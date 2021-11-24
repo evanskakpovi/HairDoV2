@@ -25,7 +25,7 @@ public class StackDesignAdapterST extends RecyclerView.Adapter<StackDesignAdapte
     // you provide access to all the views for a data item in a view holder
     public static class ViewHolder extends RecyclerView.ViewHolder   {
 
-        // each data item is just a string in this case.
+        // each data item is just a string in this case..
         ImageView myLogo;
 
         public ViewHolder(View v) {
