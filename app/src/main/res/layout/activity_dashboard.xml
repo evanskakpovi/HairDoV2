@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Stylist.DesignPage">
+
+
+    <ImageView
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/clarrisa"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp" />
+
+
+    <Button
+        android:id="@+id/button"
+        android:layout_marginLeft="32dp"
+        android:gravity="center|right"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginRight="32dp"
+        android:padding="20dp"
+        android:fontFamily="@font/indieflower"
+        android:background="@drawable/line_select"
+        android:textColor="#fff"
+        android:text="Upload my work ->"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        android:id="@+id/mrecyclerlist"
+        app:spanCount="2"
+        tools:listitem="@layout/stack_design_stdesign"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/button"
+        app:layout_constraintBottom_toTopOf="@id/chatbubble"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_margin="32dp"
+        android:background="#00000000"
+        />
+
+    <Button
+        android:id="@+id/chatbubble"
+        android:layout_marginLeft="32dp"
+        android:gravity="center|right"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        android:layout_marginRight="32dp"
+        android:padding="16dp"
+        android:fontFamily="@font/indieflower"
+        android:background="@drawable/comments"
+        android:textColor="#fff"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <Button
+        android:id="@+id/chatbubble2"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/circle_message"
+        android:fontFamily="@font/indieflower"
+        android:gravity="center|right"
+        android:padding="16dp"
+        android:textColor="#fff"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/infotext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="32dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/line_messagefade"
+        android:fontFamily="@font/indieflower"
+        android:padding="16dp"
+        android:text="Our hairdo is a big part of our personality. \n\nBe it a simple cornrow, or box braids, we recognize the talent and range of experience present in our community, and we made this platform to help you show the world what you can do. \n
+    \nWe invite you to expose your work, and ultimately provide services to member of our community for a fee."
+        android:textColor="#fff"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

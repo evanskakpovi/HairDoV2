@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/signout"
+        android:visible="false"
+        android:title="@string/log_out" />
+
+    <item android:id="@+id/signin"
+        android:visible="false"
+        android:title="@string/log_in" />
+</menu>

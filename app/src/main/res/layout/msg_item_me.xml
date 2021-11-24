@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+   >
+
+    <TextView
+        android:maxWidth="300dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:id="@+id/msg_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="12dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="12dp"
+        android:textSize="17sp"
+        android:layout_alignParentRight="true"
+        android:textColor="@color/msg_text_color"
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/my_message_me"
+        android:padding="12dp"
+        android:text="This electronic mailbisaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" />
+
+    <TextView
+        app:layout_constraintTop_toBottomOf="@id/msg_view"
+        app:layout_constraintRight_toRightOf="parent"
+        android:textSize="8sp"
+        android:id="@+id/user_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#A9A9A9"
+        android:layout_marginLeft="12dp"
+        android:paddingLeft="12dp"
+        android:gravity="right"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="12dp"
+        android:layout_below="@id/msg_view"
+        android:background="#00000000"
+        android:layout_marginBottom="12dp"
+        android:text="@string/john_doe" />
+</androidx.constraintlayout.widget.ConstraintLayout>

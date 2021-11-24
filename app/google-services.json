@@ -1,0 +1,101 @@
+{
+  "project_info": {
+    "project_number": "406163942082",
+    "firebase_url": "https://hairdo-3786e.firebaseio.com",
+    "project_id": "hairdo-3786e",
+    "storage_bucket": "hairdo-3786e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:406163942082:android:a76ec1b3bcd1e0e773a95b",
+        "android_client_info": {
+          "package_name": "com.ekm.hairdo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "406163942082-mmql7gh5fkgc1o9nenuf44ie3qqrt0ct.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ekm.hairdo",
+            "certificate_hash": "7161a10f290f056f87eeb8945c6829e540c5a408"
+          }
+        },
+        {
+          "client_id": "406163942082-qt6m0tigc6nfbhingqg45e5ekfg2h9it.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDoN1HeIWmaa0ZOmNrUsDdjt0C1dOuxZ7w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "406163942082-qt6m0tigc6nfbhingqg45e5ekfg2h9it.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:406163942082:android:fcadac291b58986673a95b",
+        "android_client_info": {
+          "package_name": "com.example.hairdo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "406163942082-8b8eie9r7aikbgikh0nbi6di4ug0lc6q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hairdo",
+            "certificate_hash": "7161a10f290f056f87eeb8945c6829e540c5a408"
+          }
+        },
+        {
+          "client_id": "406163942082-stju2qjutohqjqidaeslokeogbero2d7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hairdo",
+            "certificate_hash": "14089db56d548539322a9f8fb4ed3cbbbdaff691"
+          }
+        },
+        {
+          "client_id": "406163942082-pl6vmffj0u6243kkqldam87jvb4qls98.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hairdo",
+            "certificate_hash": "361a2ee71111267294090e410bb44e51e8aeed13"
+          }
+        },
+        {
+          "client_id": "406163942082-qt6m0tigc6nfbhingqg45e5ekfg2h9it.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDoN1HeIWmaa0ZOmNrUsDdjt0C1dOuxZ7w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "406163942082-qt6m0tigc6nfbhingqg45e5ekfg2h9it.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
