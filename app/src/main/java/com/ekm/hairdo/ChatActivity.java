@@ -106,7 +106,7 @@ public class ChatActivity extends AppCompatActivity {
     private String uid = NONE, displayname=NONE;
     private boolean isReadyToSend;
 
-    String stylistId;
+    String otherUID;
 
     ArrayList<String> personuid = new ArrayList<>();
 
@@ -122,7 +122,7 @@ public class ChatActivity extends AppCompatActivity {
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         Bundle extras = getIntent().getExtras();
-        stylistId = extras.getString(var.otherID);
+        otherUID = extras.getString(var.otherUID);
 
         //Init firebase Components
         initFirebaseStuff();
@@ -138,7 +138,8 @@ public class ChatActivity extends AppCompatActivity {
                     onSignedInInitialized(user.getDisplayName(), user.getUid());
                     Toast.makeText(ChatActivity.this, "good", Toast.LENGTH_LONG);
                 } else {
-                    //user is signed out
+                    // TODO Update code here to sign out and sign back in.
+                    //  user is signed out
                     onSignedOutCleanup();
                     startActivityForResult(
                             AuthUI.getInstance()
@@ -159,7 +160,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void sendMessageToDatabase_parent(String message, boolean image) {
 
-        System.out.println(message+"()()()");
+        System.out.println(message+"(-)(Message)(-)");
         //Getting the current date
         Date date = new Date();
         //This method returns the time in millis
@@ -172,7 +173,7 @@ public class ChatActivity extends AppCompatActivity {
             mMessage.setText("Image");
             mMessage.setUrl_message(message);
         } else {
-            mMessage.setText(NONE);
+            mMessage.setText(message);
         mMessage.setUrl_message(NONE);
         }
         mMessage.setMessage_time(timeMilli);
@@ -180,7 +181,7 @@ public class ChatActivity extends AppCompatActivity {
 
         Map<String, Object> req = mapper.convertValue(mMessage, Map.class);
 
-        String uidPattern = createUidPattern(uid, stylistId);
+        String uidPattern = createUidPattern(uid, otherUID);
 
         System.out.println(uidPattern+"____________________");
         db.collection(uidPattern)
@@ -204,12 +205,15 @@ public class ChatActivity extends AppCompatActivity {
     private void updateMessageTree_child(String docName, String message, long timemilli) {
         ChatDetails mChatDetails = new ChatDetails();
         mChatDetails.setLast_message(message);
+        System.out.println("_____________"+message+"_________________");
         mChatDetails.setLast_openned_time(timemilli);
         mChatDetails.setName(docName);
         mChatDetails.setPerson1(personuid.get(0));
         mChatDetails.setPerson2(personuid.get(1));
-        mChatDetails.setPerson1name(mUser1.getName());
-        mChatDetails.setPerson2name(mUser2.getName());
+        ArrayList<String> personsNames = new ArrayList<>();
+        personsNames.add(mUser1.getName());
+        personsNames.add(mUser2.getName());
+        mChatDetails.setPersonsNames(personsNames);
         mChatDetails.setPersons(personuid);
 
         Map<String, Object> req = mapper.convertValue(mChatDetails, Map.class);
@@ -236,10 +240,6 @@ public class ChatActivity extends AppCompatActivity {
         mChatDetails.setLast_message(message);
         mChatDetails.setLast_openned_time(timemilli);
         mChatDetails.setName("");
-        mChatDetails.setPerson1(personuid.get(0));
-        mChatDetails.setPerson2(personuid.get(1));
-        mChatDetails.setPerson1name(mUser1.getName());
-        mChatDetails.setPerson2name(mUser2.getName());
         mChatDetails.setPersons(personuid);
 
         Map<String, Object> req = mapper.convertValue(mChatDetails, Map.class);
@@ -346,9 +346,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void sendingMessage() {
         //Sending messages to database
-//                Chat mChat = new Chat(messageEditText.getText().toString().trim(), mUsername, null, true);
-//                mMessageDatabaseReference.push().setValue(mChat);
-        String text = messageEditText.getText()+"";
+        String text = messageEditText.getText().toString();
         if (text.length()>0) {
             sendMessageToDatabase_parent(text,false);
             //Clear message on send
@@ -488,8 +486,7 @@ public class ChatActivity extends AppCompatActivity {
         activateChat();
         attachDatabaseReadListener();
         getUserDetails1(uid);
-        getUserDetails2(stylistId);
-
+        getUserDetails2(otherUID);
         //Iniatilizing references to views
         initViews();
 
@@ -505,7 +502,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void attachDatabaseReadListener() {
-        String uidPattern = createUidPattern(uid, stylistId);
+        String uidPattern = createUidPattern(uid, otherUID);
         Query first = db.collection(uidPattern).orderBy("message_time", Query.Direction.ASCENDING);;//.limit(6);
         first.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
@@ -566,30 +563,7 @@ public class ChatActivity extends AppCompatActivity {
         mMessageAdapter.notifyDataSetChanged();
     }
 
-    public void fetchConfig() {
-        long cacheExpiration = 3600;
 
-        if (mFirebaseRemoteConfig.getInfo().getConfigSettings().isDeveloperModeEnabled()) {
-            cacheExpiration = 0;
-        }
-
-        mFirebaseRemoteConfig.fetch(cacheExpiration)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        mFirebaseRemoteConfig.activateFetched();
-                        applyRetrievedLengthLimit();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "ERROR GETTING CONFIG");
-                        applyRetrievedLengthLimit();
-                    }
-                });
-
-    }
 
     //TODO find a smarterway around this block
     private void getUserDetails1(String uid) {
@@ -599,6 +573,7 @@ public class ChatActivity extends AppCompatActivity {
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()) {
                   mUser1 = mapper.convertValue(document.getData(), user.class);
+                    System.out.println("--------------------------------------------->>>>>>>>>>>>"+mUser1.getName());
                 }
                 else {
                     Log.d(TAG, "No such document");
@@ -616,6 +591,7 @@ public class ChatActivity extends AppCompatActivity {
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()) {
                     mUser2 = mapper.convertValue(document.getData(), user.class);
+                    System.out.println("--------------------------------------------->>>>>>>>>>>>"+mUser2.getName());
                 }
                 else {
                     Log.d(TAG, "No such document");

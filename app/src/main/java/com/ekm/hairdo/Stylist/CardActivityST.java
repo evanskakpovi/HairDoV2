@@ -13,6 +13,8 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,12 +27,19 @@ import com.ekm.hairdo.adapters.StackAdapterST;
 import com.ekm.hairdo.listener.CustomStackAdapterListener;
 import com.ekm.hairdo.things.Stack;
 import com.ekm.hairdo.things.StackDiffCallback;
+import com.ekm.hairdo.things.user;
 import com.ekm.hairdo.var;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
+import com.firebase.ui.auth.IdpResponse;
+import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -52,6 +61,8 @@ import com.yuyakaido.android.cardstackview.SwipeableMethod;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 
 public class CardActivityST extends AppCompatActivity implements CardStackListener, CustomStackAdapterListener {
@@ -77,6 +88,18 @@ public class CardActivityST extends AppCompatActivity implements CardStackListen
     private TextView name;
     Button addButton;
     String displayname;
+    // [START auth_fui_create_launcher]
+    // See: https://developer.android.com/training/basics/intents/result
+    private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
+            new FirebaseAuthUIActivityResultContract(),
+            new ActivityResultCallback<FirebaseAuthUIAuthenticationResult>() {
+                @Override
+                public void onActivityResult(FirebaseAuthUIAuthenticationResult result) {
+                    onSignInResult(result);
+                }
+            }
+    );
+    // [END auth_fui_create_launcher]
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,8 +149,34 @@ public class CardActivityST extends AppCompatActivity implements CardStackListen
         invalidateOptionsMenu();
         name.setText(displayName);
         displayname = displayName;
+        addToUserList();
         goToDashboard();
     }
+
+    private void addToUserList() {
+
+        user mUser = new user();
+        mUser.setName(displayname);
+        // Convert POJO to Map
+        Map<String, Object> map =
+                mapper.convertValue(mUser, new TypeReference<Map<String, Object>>() {});
+        db.collection(var.USERS_DATA).document(uid)
+                .set(map)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully written!1");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing document", e);
+                    }
+                });
+
+    }
+
     private void onSignedOutCleanup() {
         uid = "";
         isUidPresent = false;
@@ -348,7 +397,7 @@ autoSwipe();
 
         else {
         Intent myIntent = new Intent(CardActivityST.this, ChatActivity.class);
-        myIntent.putExtra(var.otherID, currentStack.getStylistId()); //Optional parameters
+        myIntent.putExtra(var.otherUID, currentStack.getStylistId()); //Optional parameters
         startActivity(myIntent);
     }}
 
@@ -356,18 +405,30 @@ autoSwipe();
     public void addFavorite(boolean isChecked, String hairid) {}
 
     private void signin() {
-        startActivityForResult(
-                AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .setAvailableProviders(Arrays.asList(
-                                new AuthUI.IdpConfig.GoogleBuilder().build(),
-                                new AuthUI.IdpConfig.EmailBuilder().build()))
-                        .build(),
-                RC_SIGN_IN);
+        // Choose authentication providers
+        List<AuthUI.IdpConfig> providers = Arrays.asList(
+                new AuthUI.IdpConfig.EmailBuilder().build(),
+                new AuthUI.IdpConfig.GoogleBuilder().build());
+
+    // Create and launch sign-in intent
+        Intent signInIntent = AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setAvailableProviders(providers)
+                .build();
+        signInLauncher.launch(signInIntent);
     }
 
 
-
+    private void onSignInResult(FirebaseAuthUIAuthenticationResult result) {
+        IdpResponse response = result.getIdpResponse();
+        if (result.getResultCode() == RESULT_OK) {
+            // Successfully signed in
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            //TODO on signin
+        } else {
+           //TODO Error handling
+        }
+    }
 
 
 
@@ -422,18 +483,6 @@ autoSwipe();
         return super.onPrepareOptionsMenu(menu);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        //RESULT_OK -1
-        //RESULT_CANCELED 0
-       if (requestCode == RC_SIGN_IN) {
-           if (resultCode == RESULT_OK) {
-              goToDashboard();
-           }
-           }
-    }
 
     private void goToDashboard() {
         Intent myIntent = new Intent(CardActivityST.this, DesignPage.class);

@@ -8,7 +8,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,36 +33,25 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ChatGroupActivity extends AppCompatActivity implements UsergroupListener {
 
-    private static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
-    public static final int RC_SIGN_IN = 1001;
     private static final String ANONYMOUS = "ANONYMOUS";
-    private static final String FRIENDLY_MSG_LENGHT_KEY = "com.google.firebase:firebase-config:16.3.0" ;
     private static final String TAG = "MESSAGE_APP" ;
-    private static final int RC_PHOTO_PICKER = 1002;
     private RecyclerView mRecyclerView;
     private ChatGroupAdapter mMessageAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     ArrayList<ChatDetails> myDataset;
 
     //Firebase stuff
-    private FirebaseDatabase mDatabase;
-    private DatabaseReference mMessageDatabaseReference;
     private ChildEventListener mchildEventListener;
 
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
 
     private FirebaseStorage mFirebaseStorage;
-    private StorageReference mChatPhotoStorageReference;
-
-    private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
     private String mUsername= ANONYMOUS;
 
@@ -75,7 +63,7 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
     private String uid;
     private boolean isReadyToSend;
 
-    String stylistId;
+    String otherID;
 
     String personMe = var.NONE;
     String personOther = var.NONE;
@@ -91,33 +79,23 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         Bundle extras = getIntent().getExtras();
-        stylistId = extras.getString(var.otherID);
+        otherID = extras.getString(var.otherUID);
 
         //Init firebase Components
         initFirebaseStuff();
 
         //Auth Listener Setup
-        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
+        mAuthStateListener = firebaseAuth -> {
+            FirebaseUser user = firebaseAuth.getCurrentUser();
 
-                if (user !=null ) {
-                    //user is signin
-                    onSignedInInitialized(user.getDisplayName(), user.getUid());
-                    Toast.makeText(ChatGroupActivity.this, "good", Toast.LENGTH_LONG);
-                } else {
-                    //user is signed out
-                    onSignedOutCleanup();
-                    startActivityForResult(
-                            AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setAvailableProviders(Arrays.asList(
-                                            new AuthUI.IdpConfig.GoogleBuilder().build(),
-                                            new AuthUI.IdpConfig.EmailBuilder().build()))
-                                    .build(),
-                            RC_SIGN_IN);
-                }
+            if (user !=null ) {
+                //user is signin
+                onSignedInInitialized(user.getDisplayName(), user.getUid());
+                Toast.makeText(ChatGroupActivity.this, "good", Toast.LENGTH_LONG);
+            } else {
+                //ToDo update signingcode
+                // user is signed out
+                onSignedOutCleanup();
             }
         };
     }
@@ -135,7 +113,7 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
         //Decode other party id from chatlink pattern sample as follow ROva7D1ONCOt3jJ79BWMRJAF4I53_chatlink_w2hYtJc7VTQKODnUTLyJ0mD2GGE2
         //Compare first part to current user id. If no match, return second part
         String part1 = pattern.substring(0,pattern.lastIndexOf("_chatlink_"));
-        if (part1!=uid) {
+        if (!part1.equals(uid)) {
             System.out.println(part1);
             return part1;}
         else {
@@ -146,13 +124,8 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
 
     private void initFirebaseStuff() {
         //init firebase Components
-        mDatabase = FirebaseDatabase.getInstance();
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseStorage = FirebaseStorage.getInstance();
-        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-
-        mMessageDatabaseReference = mDatabase.getReference().child("messages");
-        mChatPhotoStorageReference = mFirebaseStorage.getReference().child("chat_photos");
     }
 
     private void initViews() {
@@ -165,10 +138,6 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
 
     //---------------------------------BOILER CODE
     private void dettachDatabaseListener() {
-        if (mchildEventListener !=null) {
-            mMessageDatabaseReference.removeEventListener(mchildEventListener);
-            mchildEventListener = null;
-        }
         if (chatDetailRegistration !=null) {
             chatDetailRegistration.remove();
         }
@@ -201,16 +170,10 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
     //TODO CHECK FOR USER
 
     private void attachDatabaseReadListener() {
-       // String uidPattern = createUidPattern(uid, stylistId);
-        //System.out.println(uidPattern);
 //        Query first = db.collection(var.MESSAGES).whereIn(personCode, Arrays.asList(uid,"other"));
-        String uidPattern = createUidPattern(uid, stylistId);
-//        Query first = db.collection(var.MESSAGES).whereEqualTo(personCode, uid);
-        Query first = db.collection(var.MESSAGES).whereArrayContains("persons", uid+"");
+        Query first = db.collection(var.MESSAGES).whereArrayContains("persons", uid);
         chatDetailRegistration = first.addSnapshotListener((queryDocumentSnapshots, e) -> {
-            System.out.println(queryDocumentSnapshots.getDocuments().size()+"  --- $$$$$$$$$$$$ -- "+uid);
             if ( queryDocumentSnapshots.getDocuments().size()>0) {
-
                 lastVisible = queryDocumentSnapshots.getDocuments()
                         .get(queryDocumentSnapshots.getDocuments().size() - 1);
                 //myDataset.clear();
@@ -222,22 +185,6 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
                             ChatDetails mDetails = mapper.convertValue(dc.getDocument().getData(), ChatDetails.class);
                             myDataset.add(mDetails);
                             mMessageAdapter.notifyDataSetChanged();
-//                            mRecyclerView.smoothScrollToPosition(mMessageAdapter.getItemCount() - 1);
-//                            mRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-//                                @Override
-//                                public void onLayoutChange(View v,
-//                                                           int left, int top, int right, int bottom,
-//                                                           int oldLeft, int oldTop, int oldRight, int oldBottom) {
-//                                    if (bottom < oldBottom) {
-//                                        mRecyclerView.postDelayed(new Runnable() {
-//                                            @Override
-//                                            public void run() {
-//                                                mRecyclerView.smoothScrollToPosition(mRecyclerView.getAdapter().getItemCount() - 1);
-//                                            }
-//                                        }, 10);
-//                                    }
-//                                }
-//                            });
                             break;
                         case MODIFIED:
                             ChatDetails mDetailsEdited = mapper.convertValue(dc.getDocument().getData(), ChatDetails.class);
@@ -318,13 +265,14 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
     @Override
     public void onChatClicked(ChatDetails mchat) {
         //TODO OPen chat activity
-        //
+        System.out.println("before going to chat "+mchat.getName());
        goToChat(getOtherUid(mchat.getName()));
     }
 
     private void goToChat(String otherUid) {
+        System.out.println("Going to chat with "+otherUid);
         Intent myIntent = new Intent(ChatGroupActivity.this, ChatActivity.class);
-        myIntent.putExtra(var.otherID, otherUid); //Optional parameters
+        myIntent.putExtra(var.otherUID, otherUid); //Optional parameters
         startActivity(myIntent);
     }
 

@@ -15,6 +15,6 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-    <string name="api_key">AIzaSyDXEgjX88-MGrtl1T78V8kgLYPLL7EmFi4</string>
+    <string name="api_key">AIzaSyBGvW6FC-p12eTdbT0mqibImEhB_19cAHA</string>
     <string name="addresstext">Providing your address will help nearby clients find your work faster. Your address will not be shared with anyone.</string>
 </resources>

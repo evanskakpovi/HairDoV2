@@ -43,7 +43,8 @@
 
 
         </activity>
-        <activity android:name=".Stylist.CardActivityST">
+        <activity android:name=".Stylist.CardActivityST"
+            android:exported="true">
 
 
             <intent-filter>

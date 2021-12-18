@@ -18,13 +18,13 @@ class AddressShowActivity : AppCompatActivity() {
     val AUTOCOMPLETE_REQUEST_CODE = 2
     lateinit var continue_button: Button
     val TAG = "Addressactivity"
-    var uid = ""
+    var uid= "";
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_address_show)
 
-        val intent: Intent = intent
-        uid = intent.getStringExtra(otherID)
+        val intent = intent
+        uid = intent.getStringExtra(otherUID).toString()
         continue_button = findViewById(R.id.donebuttoninadressact)
         continue_button.setOnClickListener{onSearchCalled()}
     }
@@ -42,6 +42,7 @@ class AddressShowActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
             when (resultCode) {
+
                 Activity.RESULT_OK -> {
                     data?.let {
                         val place = Autocomplete.getPlaceFromIntent(data)
@@ -51,7 +52,7 @@ class AddressShowActivity : AppCompatActivity() {
                         //todo save address to database
                         val myIntent = Intent(this, UploadPhoto2::class.java)
                         //send necessary data forwardd
-                        myIntent.putExtra(otherID, uid)
+                        myIntent.putExtra(otherUID, uid)
                         myIntent.putExtra(stylistAddress, place.address)
                         myIntent.putExtra(stylistLat, place.latLng?.latitude.toString())
                         myIntent.putExtra(stylistLng, place.latLng?.longitude.toString())
@@ -61,16 +62,19 @@ class AddressShowActivity : AppCompatActivity() {
 
                         Log.i(TAG, "Place: ${place.name}, ${place.id}")
                     }
+                    println(" -----------------------------------")
                 }
                 AutocompleteActivity.RESULT_ERROR -> {
                     // TODO: Handle the error.
                     data?.let {
                         val status = Autocomplete.getStatusFromIntent(data)
-                        Log.i(TAG, status.statusMessage)
+                        println(status.statusMessage+" -----------------------------------")
+                        Log.i(TAG, status.statusMessage.toString())
                     }
                 }
                 Activity.RESULT_CANCELED -> {
                     // The user canceled the operation.
+                    println(" canceled -----------------------------------")
                 }
             }
             return

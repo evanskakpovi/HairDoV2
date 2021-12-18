@@ -88,7 +88,7 @@ public class ChatGroupAdapter extends RecyclerView.Adapter<ChatGroupAdapter.View
                     .load(mDataset.get(position).getPerson1url())
                     .into(holder.photoImageView);
 
-        holder.user_text_view.setText(mDataset.get(position).getPerson1name());
+        holder.user_text_view.setText(mDataset.get(position).getPerson2name());
 
         holder.mView.setOnClickListener(view -> {
             mListener.onChatClicked(mDataset.get(position));

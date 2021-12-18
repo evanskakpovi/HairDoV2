@@ -9,7 +9,7 @@ public class var {
     public static String MESSAGES = "messages";
     public static String CHATLINK = "_chatlink_";
     public static String NONE = "none";
-    public static String otherID = "stylistUID";
+    public static String otherUID = "stylistUID";
     public static String stylistAddress = "stylistAddress";
     public static String stylistName = "stylistName";
     public static String stylistLat = "stylistLat";

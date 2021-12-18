@@ -93,7 +93,7 @@ public class DesignPage extends AppCompatActivity implements CustomStackDesignAd
         chat = findViewById(R.id.chatbubble);
         chat2 = findViewById(R.id.chatbubble2);
         chat.setOnClickListener(view -> goToChat());
-        chat2.setOnClickListener(view -> goToChat2());
+        chat2.setOnClickListener(view -> goToCardActivity());
 
         String apiKey = getString(R.string.api_key);
         /**
@@ -131,11 +131,14 @@ public class DesignPage extends AppCompatActivity implements CustomStackDesignAd
 
     private void goToChat() {
         Intent myIntent = new Intent(DesignPage.this, ChatGroupActivity.class);
-        myIntent.putExtra(var.otherID, uid); //Optional parameters
+        myIntent.putExtra(var.otherUID, uid); //Optional parameters
         startActivity(myIntent);
-    } private void goToChat2() {
+    }
+
+    //Opening customer activity page!
+    private void goToCardActivity() {
         Intent myIntent = new Intent(DesignPage.this, CardActivity.class);
-        myIntent.putExtra(var.otherID, uid); //Optional parameters
+        myIntent.putExtra(var.otherUID, uid); //Optional parameters
         startActivity(myIntent);
     }
 
@@ -164,11 +167,11 @@ public class DesignPage extends AppCompatActivity implements CustomStackDesignAd
                     if (mUser.getAddress()==null)
                     {
                         Intent myIntent = new Intent(DesignPage.this, AddressShowActivity.class);
-                        myIntent.putExtra(var.otherID, uid); //Optional parameters
+                        myIntent.putExtra(var.otherUID, uid); //Optional parameters
                         startActivity(myIntent);
                     } else {
                         Intent myIntent = new Intent(DesignPage.this, UploadPhoto2.class);
-                        myIntent.putExtra(var.otherID, uid); //Optional parameters
+                        myIntent.putExtra(var.otherUID, uid); //Optional parameters
                         myIntent.putExtra(var.stylistAddress, mUser.getAddress()); //Optional parameters
                         myIntent.putExtra(var.stylistLat, mUser.getLatitude()); //Optional parameters
                         myIntent.putExtra(var.stylistLng, mUser.getLongitude()); //Optional parameters

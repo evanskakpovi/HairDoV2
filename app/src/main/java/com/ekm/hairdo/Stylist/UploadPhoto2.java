@@ -42,7 +42,7 @@ import java.util.Map;
 import static com.ekm.hairdo.var.NONE;
 import static com.ekm.hairdo.var.USERS_DATA;
 import static com.ekm.hairdo.var.stylistAddress;
-import static com.ekm.hairdo.var.otherID;
+import static com.ekm.hairdo.var.otherUID;
 import static com.ekm.hairdo.var.stylistLat;
 import static com.ekm.hairdo.var.stylistLng;
 
@@ -80,7 +80,7 @@ public class UploadPhoto2 extends AppCompatActivity {
         mview = findViewById(R.id.animation_view);
 
         Intent intent = getIntent();
-        uid = intent.getStringExtra(otherID);
+        uid = intent.getStringExtra(otherUID);
         if (intent.getStringExtra(stylistAddress)!=null){
             address = intent.getStringExtra(stylistAddress);
             latitude = intent.getStringExtra(stylistLat);

@@ -1,5 +1,7 @@
 package com.ekm.hairdo;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -21,12 +23,16 @@ import com.ekm.hairdo.listener.CustomStackAdapterListener;
 import com.ekm.hairdo.things.Stack;
 import com.ekm.hairdo.things.StackDiffCallback;
 import com.ekm.hairdo.things.favs;
+import com.ekm.hairdo.things.user;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.firebase.ui.auth.AuthUI;
 
+import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
+import com.firebase.ui.auth.IdpResponse;
+import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -50,6 +56,7 @@ import com.yuyakaido.android.cardstackview.SwipeableMethod;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 
@@ -74,6 +81,17 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
    //Temporary fields
     private TextView name;
     String displayname;
+
+    //Init signInLauncher
+    private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
+            new FirebaseAuthUIActivityResultContract(),
+            new ActivityResultCallback<FirebaseAuthUIAuthenticationResult>() {
+                @Override
+                public void onActivityResult(FirebaseAuthUIAuthenticationResult result) {
+                    onSignInResult(result);
+                }
+            }
+    );
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,6 +139,7 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
         createSpots();}
         name.setText(displayName);
         displayname = displayName;
+        addToUserList();
     }
     private void onSignedOutCleanup() {
         uid = "";
@@ -319,7 +338,7 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
                     RC_SIGN_IN);
         } else {
         Intent myIntent = new Intent(CardActivity.this, ChatActivity.class);
-        myIntent.putExtra(var.otherID, currentStack.getStylistId()); //Optional parameters
+        myIntent.putExtra(var.otherUID, currentStack.getStylistId()); //Optional parameters
         startActivity(myIntent);
     }}
 
@@ -335,14 +354,17 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
     }
 
     private void signin() {
-        startActivityForResult(
-                AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .setAvailableProviders(Arrays.asList(
-                                new AuthUI.IdpConfig.GoogleBuilder().build(),
-                                new AuthUI.IdpConfig.EmailBuilder().build()))
-                        .build(),
-                RC_SIGN_IN);
+        // Choose authentication providers
+        List<AuthUI.IdpConfig> providers = Arrays.asList(
+                new AuthUI.IdpConfig.EmailBuilder().build(),
+                new AuthUI.IdpConfig.GoogleBuilder().build());
+
+        // Create and launch sign-in intent
+        Intent signInIntent = AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setAvailableProviders(providers)
+                .build();
+        signInLauncher.launch(signInIntent);
     }
 
     favs mFav = new favs();
@@ -455,6 +477,31 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
         }
 
     }
+    //CRITICAL add user name to usersData
+    private void addToUserList() {
+
+        user mUser = new user();
+        mUser.setName(displayname);
+        // Convert POJO to Map
+        Map<String, Object> map =
+                mapper.convertValue(mUser, new TypeReference<Map<String, Object>>() {});
+        db.collection(var.USERS_DATA).document(uid)
+                .set(map)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully written!1");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing document", e);
+                    }
+                });
+
+    }
+
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -476,6 +523,17 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
             menu.findItem(R.id.signin).setVisible(true);
         }
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    private void onSignInResult(FirebaseAuthUIAuthenticationResult result) {
+        IdpResponse response = result.getIdpResponse();
+        if (result.getResultCode() == RESULT_OK) {
+            // Successfully signed in
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            //TODO on signin
+        } else {
+            //TODO Error handling
+        }
     }
 
 }

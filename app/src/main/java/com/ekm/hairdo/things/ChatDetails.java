@@ -7,13 +7,10 @@ public class ChatDetails {
     String last_message;
     long last_openned_time;
     String name;
-    String person1;
-    String person2;
-    String person1name;
-    String person2name;
     String person1url = "https://res.cloudinary.com/hairdo/image/upload/c_scale,h_48,w_48,r_max,c_fill/v1595563675/hair/jn0zpe4wpgox2qrcdjzq.jpg";
     String person2url = "https://res.cloudinary.com/hairdo/image/upload/c_scale,h_48,w_48/v1595563675/hair/jn0zpe4wpgox2qrcdjzq.jpg";
     ArrayList<String> persons;
+    ArrayList<String> personsNames;
 
     public ChatDetails() {
         persons = new ArrayList<>();
@@ -43,37 +40,6 @@ public class ChatDetails {
         this.name = name;
     }
 
-    public String getPerson1() {
-        return person1;
-    }
-
-    public void setPerson1(String person1) {
-        this.person1 = person1;
-    }
-
-    public String getPerson2() {
-        return person2;
-    }
-
-    public void setPerson2(String person2) {
-        this.person2 = person2;
-    }
-
-    public String getPerson1name() {
-        return person1name;
-    }
-
-    public void setPerson1name(String person1name) {
-        this.person1name = person1name;
-    }
-
-    public String getPerson2name() {
-        return person2name;
-    }
-
-    public void setPerson2name(String person2name) {
-        this.person2name = person2name;
-    }
 
     public String getPerson1url() {
         return person1url;
@@ -97,5 +63,13 @@ public class ChatDetails {
 
     public void setPersons(ArrayList<String> persons) {
         this.persons = persons;
+    }
+
+    public ArrayList<String> getPersonsNames() {
+        return personsNames;
+    }
+
+    public void setPersonsNames(ArrayList<String> personsNames) {
+        this.personsNames = personsNames;
     }
 }
