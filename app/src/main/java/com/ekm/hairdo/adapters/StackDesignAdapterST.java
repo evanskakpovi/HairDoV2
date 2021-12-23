@@ -72,7 +72,6 @@ public class StackDesignAdapterST extends RecyclerView.Adapter<StackDesignAdapte
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        System.out.println(mStacks.size()+"<><><><><><>");
         if (mStacks.size() > 0) {
             //holder.price.setText(position+" / "+mStacks.size());
             Glide.with(holder.myLogo.getContext())

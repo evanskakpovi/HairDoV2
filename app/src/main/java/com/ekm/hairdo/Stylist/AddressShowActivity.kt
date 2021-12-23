@@ -7,7 +7,7 @@ import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.ekm.hairdo.R
-import com.ekm.hairdo.`var`.*
+import com.ekm.hairdo.vars.*
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity

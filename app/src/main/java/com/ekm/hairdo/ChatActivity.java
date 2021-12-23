@@ -65,8 +65,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
-import static com.ekm.hairdo.var.MESSAGES;
-import static com.ekm.hairdo.var.NONE;
+import static com.ekm.hairdo.vars.MESSAGES;
+import static com.ekm.hairdo.vars.NONE;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -108,7 +108,8 @@ public class ChatActivity extends AppCompatActivity {
 
     String otherUID;
 
-    ArrayList<String> personuid = new ArrayList<>();
+    ArrayList<String> personUID = new ArrayList<>();
+    ArrayList<String> personNames = new ArrayList<>();
 
     user mUser1, mUser2;
     @Override
@@ -122,7 +123,7 @@ public class ChatActivity extends AppCompatActivity {
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         Bundle extras = getIntent().getExtras();
-        otherUID = extras.getString(var.otherUID);
+        otherUID = extras.getString(vars.otherUID);
 
         //Init firebase Components
         initFirebaseStuff();
@@ -168,10 +169,11 @@ public class ChatActivity extends AppCompatActivity {
 
         Message mMessage = new Message();
 
-        mMessage.setName(displayname);
+        mMessage.setName(mUser1.getName());
         if (image) {
             mMessage.setText("Image");
             mMessage.setUrl_message(message);
+            isFileChose = false;
         } else {
             mMessage.setText(message);
         mMessage.setUrl_message(NONE);
@@ -183,7 +185,6 @@ public class ChatActivity extends AppCompatActivity {
 
         String uidPattern = createUidPattern(uid, otherUID);
 
-        System.out.println(uidPattern+"____________________");
         db.collection(uidPattern)
                 .document().set(req)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -208,13 +209,9 @@ public class ChatActivity extends AppCompatActivity {
         System.out.println("_____________"+message+"_________________");
         mChatDetails.setLast_openned_time(timemilli);
         mChatDetails.setName(docName);
-        mChatDetails.setPerson1(personuid.get(0));
-        mChatDetails.setPerson2(personuid.get(1));
-        ArrayList<String> personsNames = new ArrayList<>();
-        personsNames.add(mUser1.getName());
-        personsNames.add(mUser2.getName());
-        mChatDetails.setPersonsNames(personsNames);
-        mChatDetails.setPersons(personuid);
+
+        mChatDetails.setPersons(personUID);
+        mChatDetails.setPersonsNames(personNames);
 
         Map<String, Object> req = mapper.convertValue(mChatDetails, Map.class);
 
@@ -239,13 +236,15 @@ public class ChatActivity extends AppCompatActivity {
         ChatDetails mChatDetails = new ChatDetails();
         mChatDetails.setLast_message(message);
         mChatDetails.setLast_openned_time(timemilli);
-        mChatDetails.setName("");
-        mChatDetails.setPersons(personuid);
+        mChatDetails.setName(name);
+
+        mChatDetails.setPersons(personUID);
+        mChatDetails.setPersonsNames(personNames);
 
         Map<String, Object> req = mapper.convertValue(mChatDetails, Map.class);
 
         db.collection(uidPattern)
-                .document(var.chatDetails).set(req)
+                .document(vars.chatDetails).set(req)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -261,14 +260,16 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void selectImage() {
-        if (!isFileChose){
-            ImagePicker.Companion.with(this)
-                    .saveDir(new File(Environment.getExternalStorageDirectory(), "HairDo"))
-                    //.crop(9f,16f)	    			//Crop image(Optional), Check Customization for more option
-                    .compress(1024)			//Final image size will be less than 1 MB(Optional)
-                    .maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
-                    .start();
-        }}
+//        if (!isFileChose){
+//            ImagePicker.Companion.with(this)
+//                    .saveDir(new File(Environment.getExternalStorageDirectory(), "HairDo"))
+//                    //.crop(9f,16f)	    			//Crop image(Optional), Check Customization for more option
+//                    .compress(1024)			//Final image size will be less than 1 MB(Optional)
+//                    .maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
+//                    .start();
+//        }
+
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -299,22 +300,12 @@ public class ChatActivity extends AppCompatActivity {
                         public void onSuccess(String requestId, Map resultData) {
                             //todo edit filename structure
                             String url = (String) resultData.get("secure_url");
-                            String id = (String) resultData.get("public_id");
-                            String finalid = id.substring(id.lastIndexOf("hair/")+5);
-                          //  sendMessageToDatabase_parent(url,true);
-                            //myStack.setHairid(finalid);
-                            //myStack.setUrl(url);
-                            //addStyleToFirestore(myStack);
-                            System.out.println(finalid);
-                            System.out.println(resultData);
-                            System.out.println("+++++++++++++++done");
-                            //todo upload
+                            sendMessageToDatabase_parent(url,true);
                         }
 
                         @Override
                         public void onError(String requestId, ErrorInfo error) {
                             System.out.println(error.getDescription());
-                            System.out.println("+++++++++++++++notdone");
                         }
 
                         @Override
@@ -323,7 +314,7 @@ public class ChatActivity extends AppCompatActivity {
                     })
                     //.option("public_id", "style_"+uid)
                     //todo change the unsinged code
-                    .unsigned("hairdo_default2").dispatch();
+                    .unsigned("hairdo_default2").dispatch(this);
 
         } else if (resultCode == ImagePicker.RESULT_ERROR) {
             ///  Toast.makeText(this, ImagePicker, Toast.LENGTH_SHORT).show();
@@ -419,29 +410,41 @@ public class ChatActivity extends AppCompatActivity {
 
 
     private String createUidPattern(String myUID, String hisUID) {
+        personUID.clear();
+        personNames.clear();
         String a = myUID;
         String b = hisUID;
 
         int c = a.compareTo(b);
 
         if (c<0) {
-            personuid.add(a);
-            personuid.add(b);
-            return a+var.CHATLINK+b;
+            personUID.add(a);
+            personUID.add(b);
+            personNames.add(mUser1.getName());
+            personNames.add(mUser2.getName());
+            return a+ vars.CHATLINK+b;
         } else if (c>0) {
-            personuid.add(b);
-            personuid.add(a);
-            return b+var.CHATLINK+a;
+            personUID.add(b);
+            personUID.add(a);
+            personNames.add(mUser2.getName());
+            personNames.add(mUser1.getName());
+            return b+ vars.CHATLINK+a;
         } else if (c==0) {
-            personuid.add(a);
-            personuid.add(a);
-            return a+var.CHATLINK+a;
+            personUID.add(a);
+            personUID.add(a);
+            personNames.add(mUser1.getName());
+            personNames.add(mUser1.getName());
+            return a+ vars.CHATLINK+a;
         } else {
-            personuid.add(a);
-            personuid.add(a);
-            return a+var.CHATLINK+a;}
+            personUID.add(a);
+            personUID.add(a);
+            personNames.add(mUser1.getName());
+            personNames.add(mUser2.getName());
+            return a+ vars.CHATLINK+a;}
 
     }
+
+
 
     private void initFirebaseStuff() {
         //init firebase Components
@@ -471,6 +474,8 @@ public class ChatActivity extends AppCompatActivity {
             mMessageDatabaseReference.removeEventListener(mchildEventListener);
             mchildEventListener = null;
         }
+
+
     }
     private void onSignedOutCleanup() {
         displayname = NONE;
@@ -484,9 +489,7 @@ public class ChatActivity extends AppCompatActivity {
         this.uid = uid;
         this.displayname = displayname;
         activateChat();
-        attachDatabaseReadListener();
-        getUserDetails1(uid);
-        getUserDetails2(otherUID);
+        getUserDetails1(uid, otherUID);
         //Iniatilizing references to views
         initViews();
 
@@ -500,26 +503,31 @@ public class ChatActivity extends AppCompatActivity {
     private void activateChat() {
         isReadyToSend = true;
     }
-
+    Query first;
     private void attachDatabaseReadListener() {
+
         String uidPattern = createUidPattern(uid, otherUID);
-        Query first = db.collection(uidPattern).orderBy("message_time", Query.Direction.ASCENDING);;//.limit(6);
-        first.addSnapshotListener(new EventListener<QuerySnapshot>() {
+        first = db.collection(uidPattern).orderBy("message_time", Query.Direction.ASCENDING);;//.limit(6);
+        //passing the activity with the context "this" allows automatic cleanup of the listner
+        first.addSnapshotListener(this, new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
 
                 if ( queryDocumentSnapshots.getDocuments().size()>0) {
                     lastVisible = queryDocumentSnapshots.getDocuments()
                             .get(queryDocumentSnapshots.getDocuments().size() - 1);
-
+                    int count = 0;
                     // Listen to query changes and update screen
                     for (DocumentChange dc : queryDocumentSnapshots.getDocumentChanges()) {
                         if (dc.getDocument().getData().containsKey("last_message")) {
                             continue;
                         }
+
                         Message message = mapper.convertValue(dc.getDocument().getData(), Message.class);
                         myDataset.add(message);
                         mMessageAdapter.notifyDataSetChanged();
+                        count++;
+                        System.out.println("<"+count+">");
                         mRecyclerView.smoothScrollToPosition(mMessageAdapter.getItemCount() - 1);
                         mRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
 
@@ -566,16 +574,19 @@ public class ChatActivity extends AppCompatActivity {
 
 
     //TODO find a smarterway around this block
-    private void getUserDetails1(String uid) {
-        DocumentReference docRef = db.collection(var.USERS_DATA).document(uid);
+    private void getUserDetails1(String uid, String otherUID) {
+        DocumentReference docRef = db.collection(vars.USERS_DATA).document(uid);
         docRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()) {
                   mUser1 = mapper.convertValue(document.getData(), user.class);
-                    System.out.println("--------------------------------------------->>>>>>>>>>>>"+mUser1.getName());
+
+                  //GET second user details after first user details sucessfull
+                  getUserDetails2(otherUID);
                 }
                 else {
+                    //TODO dispolay error fetching data and abort activity
                     Log.d(TAG, "No such document");
 
                 }
@@ -585,13 +596,15 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
     private void getUserDetails2(String uid) {
-        DocumentReference docRef = db.collection(var.USERS_DATA).document(uid);
+        DocumentReference docRef = db.collection(vars.USERS_DATA).document(uid);
         docRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()) {
                     mUser2 = mapper.convertValue(document.getData(), user.class);
-                    System.out.println("--------------------------------------------->>>>>>>>>>>>"+mUser2.getName());
+
+                    //download chat data
+                    attachDatabaseReadListener();
                 }
                 else {
                     Log.d(TAG, "No such document");

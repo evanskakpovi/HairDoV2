@@ -46,7 +46,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     @Override
     public int getItemViewType(int position) {
         boolean textItem = (mDataset.get(position).getUrl_message().equals("none"));
-        System.out.println(mDataset.get(position).getUrl_message()+" --- " +textItem + " --- "+uid);
+     //   System.out.println(mDataset.get(position).getUrl_message()+" --- " +textItem + " --- "+uid);
         if (mDataset.get(position).getKey().equals(uid)){
             if (textItem){
                 return R.layout.msg_item_me;}

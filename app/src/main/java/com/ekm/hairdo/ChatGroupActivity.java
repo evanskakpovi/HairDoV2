@@ -24,14 +24,11 @@ import com.google.common.collect.Iterables;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
@@ -63,10 +60,10 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
     private String uid;
     private boolean isReadyToSend;
 
-    String otherID;
+    //String otherID;
 
-    String personMe = var.NONE;
-    String personOther = var.NONE;
+    String personMe = vars.NONE;
+    String personOther = vars.NONE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +76,7 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         Bundle extras = getIntent().getExtras();
-        otherID = extras.getString(var.otherUID);
+        //otherID = extras.getString(vars.otherUID);
 
         //Init firebase Components
         initFirebaseStuff();
@@ -133,7 +130,7 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
         myDataset = new ArrayList<>();
         mRecyclerView =  findViewById(R.id.mview);
         mLayoutManager = new LinearLayoutManager(this);
-        mMessageAdapter = new ChatGroupAdapter(myDataset, R.layout.user_group, uid, this);
+        mMessageAdapter = new ChatGroupAdapter(myDataset, R.layout.user_group, uid, this, uid);
     }
 
     //---------------------------------BOILER CODE
@@ -171,7 +168,7 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
 
     private void attachDatabaseReadListener() {
 //        Query first = db.collection(var.MESSAGES).whereIn(personCode, Arrays.asList(uid,"other"));
-        Query first = db.collection(var.MESSAGES).whereArrayContains("persons", uid);
+        Query first = db.collection(vars.MESSAGES).whereArrayContains("persons", uid);
         chatDetailRegistration = first.addSnapshotListener((queryDocumentSnapshots, e) -> {
             if ( queryDocumentSnapshots.getDocuments().size()>0) {
                 lastVisible = queryDocumentSnapshots.getDocuments()
@@ -191,8 +188,8 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
                             ChatDetails james = Iterables.tryFind(myDataset,
                                     new Predicate<ChatDetails>() {
                                         public boolean apply(ChatDetails c) {
-                                            String part1 = mDetailsEdited.getPerson1()+mDetailsEdited.getPerson2();
-                                            return part1.equals(c.getPerson1()+c.getPerson2());
+                                            String part1 = mDetailsEdited.getPersons().get(0)+mDetailsEdited.getPersons().get(1);
+                                            return part1.equals(c.getPersons().get(0)+c.getPersons().get(1));
                                         }
                                     }).orNull();
                             if (james!=null) {
@@ -211,23 +208,6 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
         });
     }
 
-    private String createUidPattern(String myUID, String hisUID) {
-        String a = myUID;
-        String b = hisUID;
-
-        int c = a.compareTo(b);
-
-        if (c<0) {
-            return a+var.CHATLINK+b;
-        } else if (c>0) {
-            return b+var.CHATLINK+a;
-        } else if (c==0) {
-            return a+var.CHATLINK+a;
-        } else {
-            return a+var.CHATLINK+a;}
-
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -239,9 +219,11 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
         super.onPause();
         mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
         dettachDatabaseListener();
-        myDataset.clear();
-        mMessageAdapter.notifyDataSetChanged();
-    }
+        if (myDataset!=null) {
+            myDataset.clear();
+            mMessageAdapter.notifyDataSetChanged();
+        }
+        }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -272,7 +254,7 @@ public class ChatGroupActivity extends AppCompatActivity implements UsergroupLis
     private void goToChat(String otherUid) {
         System.out.println("Going to chat with "+otherUid);
         Intent myIntent = new Intent(ChatGroupActivity.this, ChatActivity.class);
-        myIntent.putExtra(var.otherUID, otherUid); //Optional parameters
+        myIntent.putExtra(vars.otherUID, otherUid); //Optional parameters
         startActivity(myIntent);
     }
 

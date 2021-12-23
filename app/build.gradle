@@ -115,4 +115,7 @@ dependencies {
 
     //Guava java
     implementation("com.google.guava:guava:29.0-android")
+
+    //Jetpack camera
+    implementation "com.google.accompanist:accompanist-permissions:<version>"
 }

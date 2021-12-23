@@ -204,7 +204,7 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
     }
 **/
     private void createSpots() {
-        Query first = db.collection(var.STYLES).limit(6);
+        Query first = db.collection(vars.STYLES).limit(6);
                 first.get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -234,7 +234,7 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
 
     private void createSpotsNew() {
 
-        Query next = db.collection(var.STYLES).startAfter(lastVisible).limit(10);
+        Query next = db.collection(vars.STYLES).startAfter(lastVisible).limit(10);
 
                 next.get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -338,7 +338,7 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
                     RC_SIGN_IN);
         } else {
         Intent myIntent = new Intent(CardActivity.this, ChatActivity.class);
-        myIntent.putExtra(var.otherUID, currentStack.getStylistId()); //Optional parameters
+        myIntent.putExtra(vars.otherUID, currentStack.getStylistId()); //Optional parameters
         startActivity(myIntent);
     }}
 
@@ -409,7 +409,7 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
         // Convert POJO to Map
         Map<String, Object> map =
                 mapper.convertValue(mFav, new TypeReference<Map<String, Object>>() {});
-        db.collection(var.USERSFAVS).document(uid)
+        db.collection(vars.USERSFAVS).document(uid)
                 .set(map)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -432,7 +432,7 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
             // Convert POJO to Map
             Map<String, Object> map =
                     mapper.convertValue(mFav, new TypeReference<Map<String, Object>>() {});
-            db.collection(var.USERSFAVS).document(uid)
+            db.collection(vars.USERSFAVS).document(uid)
                     .set(map)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
@@ -485,7 +485,7 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
         // Convert POJO to Map
         Map<String, Object> map =
                 mapper.convertValue(mUser, new TypeReference<Map<String, Object>>() {});
-        db.collection(var.USERS_DATA).document(uid)
+        db.collection(vars.USERS_DATA).document(uid)
                 .set(map)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override

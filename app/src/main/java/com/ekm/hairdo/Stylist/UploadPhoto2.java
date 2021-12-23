@@ -39,12 +39,12 @@ import com.google.firebase.firestore.SetOptions;
 import java.io.File;
 import java.util.Map;
 
-import static com.ekm.hairdo.var.NONE;
-import static com.ekm.hairdo.var.USERS_DATA;
-import static com.ekm.hairdo.var.stylistAddress;
-import static com.ekm.hairdo.var.otherUID;
-import static com.ekm.hairdo.var.stylistLat;
-import static com.ekm.hairdo.var.stylistLng;
+import static com.ekm.hairdo.vars.NONE;
+import static com.ekm.hairdo.vars.USERS_DATA;
+import static com.ekm.hairdo.vars.stylistAddress;
+import static com.ekm.hairdo.vars.otherUID;
+import static com.ekm.hairdo.vars.stylistLat;
+import static com.ekm.hairdo.vars.stylistLng;
 
 public class UploadPhoto2 extends AppCompatActivity {
 

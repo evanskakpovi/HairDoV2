@@ -1,6 +1,8 @@
 package com.ekm.hairdo;
 
-public class var {
+import java.util.ArrayList;
+
+public class vars {
 
     public static final String USERSFAVS = "usersFavs";
     public static final String USERS_DATA = "usersData";
@@ -16,4 +18,19 @@ public class var {
     public static String stylistLng = "stylistLng";
     public static String chatDetails = "chatDetails";
     public static String messages = "MESSAGES_TREE";
+
+    public static int getHisUIDPosition(String myUID, String hisUID) {
+        String a = myUID;
+        String b = hisUID;
+        System.out.println( a+"____"+b);
+
+        int c = a.compareTo(b);
+
+        if (c<0) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
 }

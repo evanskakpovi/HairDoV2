@@ -23,7 +23,7 @@ import com.ekm.hairdo.adapters.StackDesignAdapterST;
 import com.ekm.hairdo.listener.CustomStackDesignAdapterListener;
 import com.ekm.hairdo.things.Stack;
 import com.ekm.hairdo.things.user;
-import com.ekm.hairdo.var;
+import com.ekm.hairdo.vars;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -131,14 +131,14 @@ public class DesignPage extends AppCompatActivity implements CustomStackDesignAd
 
     private void goToChat() {
         Intent myIntent = new Intent(DesignPage.this, ChatGroupActivity.class);
-        myIntent.putExtra(var.otherUID, uid); //Optional parameters
+        myIntent.putExtra(vars.otherUID, uid); //Optional parameters
         startActivity(myIntent);
     }
 
     //Opening customer activity page!
     private void goToCardActivity() {
         Intent myIntent = new Intent(DesignPage.this, CardActivity.class);
-        myIntent.putExtra(var.otherUID, uid); //Optional parameters
+        myIntent.putExtra(vars.otherUID, uid); //Optional parameters
         startActivity(myIntent);
     }
 
@@ -156,7 +156,7 @@ public class DesignPage extends AppCompatActivity implements CustomStackDesignAd
     }
 
     private void getadress() {
-        DocumentReference docRef = db.collection(var.USERS_DATA).document(uid);
+        DocumentReference docRef = db.collection(vars.USERS_DATA).document(uid);
         docRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
@@ -167,14 +167,14 @@ public class DesignPage extends AppCompatActivity implements CustomStackDesignAd
                     if (mUser.getAddress()==null)
                     {
                         Intent myIntent = new Intent(DesignPage.this, AddressShowActivity.class);
-                        myIntent.putExtra(var.otherUID, uid); //Optional parameters
+                        myIntent.putExtra(vars.otherUID, uid); //Optional parameters
                         startActivity(myIntent);
                     } else {
                         Intent myIntent = new Intent(DesignPage.this, UploadPhoto2.class);
-                        myIntent.putExtra(var.otherUID, uid); //Optional parameters
-                        myIntent.putExtra(var.stylistAddress, mUser.getAddress()); //Optional parameters
-                        myIntent.putExtra(var.stylistLat, mUser.getLatitude()); //Optional parameters
-                        myIntent.putExtra(var.stylistLng, mUser.getLongitude()); //Optional parameters
+                        myIntent.putExtra(vars.otherUID, uid); //Optional parameters
+                        myIntent.putExtra(vars.stylistAddress, mUser.getAddress()); //Optional parameters
+                        myIntent.putExtra(vars.stylistLat, mUser.getLatitude()); //Optional parameters
+                        myIntent.putExtra(vars.stylistLng, mUser.getLongitude()); //Optional parameters
                         startActivity(myIntent);
                     }
                 }
@@ -188,7 +188,7 @@ public class DesignPage extends AppCompatActivity implements CustomStackDesignAd
     }
 
     private void createSpots() {
-        Query first = db.collection(var.STYLES).whereEqualTo("stylistId", uid);
+        Query first = db.collection(vars.STYLES).whereEqualTo("stylistId", uid);
         first.get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -228,7 +228,7 @@ public class DesignPage extends AppCompatActivity implements CustomStackDesignAd
             // Convert POJO to Map
             Map<String, Object> map =
                     mapper.convertValue(mUser, new TypeReference<Map<String, Object>>() {});
-            db.collection(var.USERS_DATA).document(uid)
+            db.collection(vars.USERS_DATA).document(uid)
                     .set(map)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override

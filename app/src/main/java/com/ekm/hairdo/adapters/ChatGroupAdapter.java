@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.ekm.hairdo.R;
 import com.ekm.hairdo.listener.UsergroupListener;
 import com.ekm.hairdo.things.ChatDetails;
+import com.ekm.hairdo.vars;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class ChatGroupAdapter extends RecyclerView.Adapter<ChatGroupAdapter.View
     private ArrayList<ChatDetails> mDataset;
     private UsergroupListener mListener;
     private int message_layout;
+    private String myUID;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -47,11 +49,12 @@ public class ChatGroupAdapter extends RecyclerView.Adapter<ChatGroupAdapter.View
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public ChatGroupAdapter(ArrayList<ChatDetails> myDataset, int messagelayout, String uid, UsergroupListener mListener) {
+    public ChatGroupAdapter(ArrayList<ChatDetails> myDataset, int messagelayout, String uid, UsergroupListener mListener, String myUID) {
         mDataset = myDataset;
         message_layout = messagelayout;
         this.uid = uid;
         this.mListener = mListener;
+        this.myUID = myUID;
     }
 
     @Override
@@ -88,7 +91,18 @@ public class ChatGroupAdapter extends RecyclerView.Adapter<ChatGroupAdapter.View
                     .load(mDataset.get(position).getPerson1url())
                     .into(holder.photoImageView);
 
-        holder.user_text_view.setText(mDataset.get(position).getPerson2name());
+            // find my iud position in persons
+        int me = mDataset.get(position).getPersons().indexOf(myUID);
+        System.out.println("My UID Position is "+me+" for IUD="+myUID);
+        //set text to personname position 0 if me =1, or 1 is me = 0;
+        switch (me) {
+            case 0:
+                holder.user_text_view.setText(mDataset.get(position).getPersonsNames().get(vars.getHisUIDPosition(uid, mDataset.get(position).getPersons().get(1))));
+                break;
+            case 1:
+                holder.user_text_view.setText(mDataset.get(position).getPersonsNames().get(vars.getHisUIDPosition(uid, mDataset.get(position).getPersons().get(0))));
+                break;
+        }
 
         holder.mView.setOnClickListener(view -> {
             mListener.onChatClicked(mDataset.get(position));

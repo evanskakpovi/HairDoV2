@@ -16,7 +16,6 @@ import android.widget.TextView;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DiffUtil;
@@ -28,7 +27,7 @@ import com.ekm.hairdo.listener.CustomStackAdapterListener;
 import com.ekm.hairdo.things.Stack;
 import com.ekm.hairdo.things.StackDiffCallback;
 import com.ekm.hairdo.things.user;
-import com.ekm.hairdo.var;
+import com.ekm.hairdo.vars;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -160,7 +159,7 @@ public class CardActivityST extends AppCompatActivity implements CardStackListen
         // Convert POJO to Map
         Map<String, Object> map =
                 mapper.convertValue(mUser, new TypeReference<Map<String, Object>>() {});
-        db.collection(var.USERS_DATA).document(uid)
+        db.collection(vars.USERS_DATA).document(uid)
                 .set(map)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -252,7 +251,7 @@ public class CardActivityST extends AppCompatActivity implements CardStackListen
 **/
     private void createSpots() {
 
-        Query first = db.collection(var.STYLES).limit(6);
+        Query first = db.collection(vars.STYLES).limit(6);
                 first.get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -303,7 +302,7 @@ autoSwipe();
     }
     private void createSpotsNew() {
 
-        Query next = db.collection(var.STYLES).startAfter(lastVisible).limit(10);
+        Query next = db.collection(vars.STYLES).startAfter(lastVisible).limit(10);
 
                 next.get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -397,7 +396,7 @@ autoSwipe();
 
         else {
         Intent myIntent = new Intent(CardActivityST.this, ChatActivity.class);
-        myIntent.putExtra(var.otherUID, currentStack.getStylistId()); //Optional parameters
+        myIntent.putExtra(vars.otherUID, currentStack.getStylistId()); //Optional parameters
         startActivity(myIntent);
     }}
 
