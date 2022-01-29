@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.ekm.hairdo.R;
 import com.ekm.hairdo.listener.CustomStackDesignAdapterListener;
 import com.ekm.hairdo.things.Stack;
+import com.ekm.hairdo.things.StackD;
 
 import java.util.ArrayList;
 

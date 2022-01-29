@@ -22,6 +22,7 @@ import com.cloudinary.android.callback.UploadCallback;
 
 import com.ekm.hairdo.R;
 import com.ekm.hairdo.things.Stack;
+import com.ekm.hairdo.things.StackD;
 import com.ekm.hairdo.things.user;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -52,7 +53,7 @@ public class UploadPhoto2 extends AppCompatActivity {
     ImageView viewImage;
     Button b;
 
-    Stack myStack;
+    StackD myStack;
     public ObjectMapper mapper;
 
     // Access a Cloud Firestore instance from your Activity
@@ -122,7 +123,7 @@ public class UploadPhoto2 extends AppCompatActivity {
 
     private void setUpStack() {
         //Create a stack
-        myStack = new Stack();
+        myStack = new StackD();
         //set address
         myStack.setAddress(address);
         //set gps location
@@ -209,7 +210,7 @@ public class UploadPhoto2 extends AppCompatActivity {
     }
 
     //used for goehashing
-    private String geoHashForMe(Stack mstack) {
+    private String geoHashForMe(StackD mstack) {
          Location location = new Location("geohash");
          location.setLatitude(Double.parseDouble(mstack.getLat()));
          location.setLongitude(Double.parseDouble(mstack.getLng()));
@@ -218,7 +219,7 @@ public class UploadPhoto2 extends AppCompatActivity {
          return  hash.toString(); //"v12n8trdj"
          }
 
-         private void addStyleToFirestore(Stack mstack) {
+         private void addStyleToFirestore(StackD mstack) {
              // Convert POJO to Map
              mstack.setDistance(geoHashForMe(mstack));
              Map<String, Object> map =

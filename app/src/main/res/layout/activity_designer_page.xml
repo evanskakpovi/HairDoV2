@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Stylist.DesignPage">
+    tools:context=".Stylist.DesignerPageActivity">
 
 
     <ImageView
@@ -96,5 +96,4 @@
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

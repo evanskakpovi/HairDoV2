@@ -123,11 +123,11 @@ public class StackAdapter extends RecyclerView.Adapter<StackAdapter.ViewHolder>{
                     }
                 }
             });
-            if (mStacks.get(position).isFav() && mStacks.get(position).isFavUpdated()) {
+            if (mStacks.get(position).getFav() && mStacks.get(position).getFavUpdated()) {
                 holder.favorite.setVisibility(View.VISIBLE);
                 holder.favorite.setChecked(true);
                 System.out.println("visible "+position+" checked");
-            } else   if (!mStacks.get(position).isFav() && mStacks.get(position).isFavUpdated()) {
+            } else   if (!mStacks.get(position).getFav() && mStacks.get(position).getFavUpdated()) {
                 holder.favorite.setVisibility(View.VISIBLE);
                 holder.favorite.setChecked(false);
                 System.out.println("visible "+position+" unchecked");

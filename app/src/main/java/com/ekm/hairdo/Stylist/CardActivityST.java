@@ -70,7 +70,7 @@ public class CardActivityST extends AppCompatActivity implements CardStackListen
     StackAdapterST mStackAdapter;
     CardStackLayoutManager manager;
     ArrayList<Stack> mStacks;
-    public static final int RC_SIGN_IN = 1002;
+
     public ObjectMapper mapper;
     // Access a Cloud Firestore instance from your Activity
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -123,19 +123,16 @@ public class CardActivityST extends AppCompatActivity implements CardStackListen
 
         mFirebaseAuth = FirebaseAuth.getInstance();
         //Auth Listener Setup
-        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                System.out.println(user);
-                if (user !=null ) {
-                    //user is signin
-                    onSignedInInitialized(user.getDisplayName(), user.getUid());
-                 //   Toast.makeText(CardActivityST.this, "good", Toast.LENGTH_LONG);
-                } else {
-                    //user is signed out
-                    onSignedOutCleanup();
-                }
+        mAuthStateListener = firebaseAuth -> {
+            FirebaseUser user = firebaseAuth.getCurrentUser();
+           // System.out.println(user);
+            if (user !=null ) {
+                //user is signin
+                onSignedInInitialized(user.getDisplayName(), user.getUid());
+             //   Toast.makeText(CardActivityST.this, "good", Toast.LENGTH_LONG);
+            } else {
+                //user is signed out
+                onSignedOutCleanup();
             }
         };
 

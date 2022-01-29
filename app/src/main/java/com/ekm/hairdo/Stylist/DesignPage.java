@@ -22,6 +22,7 @@ import com.ekm.hairdo.R;
 import com.ekm.hairdo.adapters.StackDesignAdapterST;
 import com.ekm.hairdo.listener.CustomStackDesignAdapterListener;
 import com.ekm.hairdo.things.Stack;
+import com.ekm.hairdo.things.StackD;
 import com.ekm.hairdo.things.user;
 import com.ekm.hairdo.vars;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -65,16 +66,14 @@ public class DesignPage extends AppCompatActivity implements CustomStackDesignAd
     private FirebaseAuth.AuthStateListener mAuthStateListener;
 
     DocumentSnapshot lastVisible;
-    Direction mDirection = Direction.Bottom;
+
     private String uid = "";
     private boolean isUidPresent;
     Button showtalent;
     //Temporary fields
-    private TextView name;
     Button uploadButton;
     Button chat,chat2;
     String displayname;
-    String address;
 
 
 
@@ -195,7 +194,7 @@ public class DesignPage extends AppCompatActivity implements CustomStackDesignAd
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful() &&task.getResult().size()>0) {
                             mStacks.clear();
-                            System.out.println("Task: "+task.getResult().size());
+                            //System.out.println("Task: "+task.getResult().size());
                             lastVisible = task.getResult().getDocuments()
                                     .get(task.getResult().size() -1);
                            // System.out.println("last visible: "+lastVisible);

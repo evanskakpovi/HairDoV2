@@ -382,7 +382,7 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
                     //TODO update with offline data saving mode
                     System.out.println("xxxxxxxxxxxxxxxxxxxxxxx  "+mStacks.size());
                     for (Stack m:mStacks){
-                        if (mFav.getmFavs().contains(m.getHairid())) {
+                        if (mFav.getMFavs().contains(m.getHairid())) {
                             m.setFav(true);
                             System.out.println(m.getHairid()+"--");
                         }
@@ -404,7 +404,7 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
 
     private void addToFavorite(String id) {
 
-        if (!mFav.getmFavs().contains(id)){
+        if (!mFav.getMFavs().contains(id)){
         mFav.addToFav(id);
         // Convert POJO to Map
         Map<String, Object> map =
@@ -427,7 +427,7 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
     }}
 
     private void removeFavorite(String id) {
-        if (mFav.getmFavs().contains(id)){
+        if (mFav.getMFavs().contains(id)){
             mFav.removeFav(id);
             // Convert POJO to Map
             Map<String, Object> map =

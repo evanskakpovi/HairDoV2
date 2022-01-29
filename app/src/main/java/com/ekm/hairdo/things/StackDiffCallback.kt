@@ -4,12 +4,12 @@ import androidx.recyclerview.widget.DiffUtil
 
 
 class StackDiffCallback(
-        private val old: List<Stack>,
-        private val new: List<Stack>
+    private val old: List<Stack>?,
+    private val new: List<Stack>
 ) : DiffUtil.Callback() {
 
     override fun getOldListSize(): Int {
-        return old.size
+        return old!!.size
     }
 
     override fun getNewListSize(): Int {
@@ -17,11 +17,11 @@ class StackDiffCallback(
     }
 
     override fun areItemsTheSame(oldPosition: Int, newPosition: Int): Boolean {
-        return old[oldPosition].hairid == new[newPosition].hairid
+        return old!![oldPosition].hairid == new[newPosition].hairid
     }
 
     override fun areContentsTheSame(oldPosition: Int, newPosition: Int): Boolean {
-        return old[oldPosition] == new[newPosition]
+        return old!![oldPosition] == new[newPosition]
     }
 
 }
