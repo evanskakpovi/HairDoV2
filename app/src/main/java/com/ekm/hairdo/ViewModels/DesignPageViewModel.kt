@@ -4,8 +4,10 @@ import android.nfc.Tag
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.*
+import com.ekm.hairdo.R
 import com.ekm.hairdo.things.Stack
 import com.ekm.hairdo.things.Stack.Companion.toStack
+import com.ekm.hairdo.things.user
 import com.ekm.hairdo.vars
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.PropertyAccessor
@@ -32,16 +34,19 @@ class DesignPageViewModel : ViewModel() {
 
     //Get Data
     private val _stacksViewModel = MutableLiveData<ArrayList<Stack>>()
+    private val _mUser = MutableLiveData<user>()
     //Convert data into LiveData (not mutable)
     val stacksViewModel: LiveData<ArrayList<Stack>>
         get() = _stacksViewModel
-
+    val mUser: LiveData<user>
+        get() = _mUser
 
     var mFirebaseAuth: FirebaseAuth
 
     private var uid = ""
     private var isUidPresent = false
     private var dataLoaded = false
+    private var attempToGetAddress = false
     init {
         // init firebaseauth and listener here if there is an error
         Log.i(TAG, "init mFirebaseAuth")
@@ -72,12 +77,27 @@ class DesignPageViewModel : ViewModel() {
                         }
                         _stacksViewModel.postValue(freshStacks)
                         dataLoaded = true
+                        getAdress()
                     }
 
                 }
                 .addOnFailureListener { exception ->
                     Log.w(TAG, "Error getting Stacks: ", exception)
                 }
+        }
+    }
+
+    fun getAdress(){
+        if (!attempToGetAddress)
+        viewModelScope.launch {
+            val docRef = db.collection(vars.USERS_DATA).document(uid)
+            docRef.get().addOnSuccessListener {
+                document -> if (document.exists()) {
+                    val mUser: user = mapper.convertValue(document.data, user::class.java)
+                    attempToGetAddress = true
+                    _mUser.postValue(mUser)
+            }
+            }
         }
     }
 

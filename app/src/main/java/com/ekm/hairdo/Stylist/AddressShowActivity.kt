@@ -5,9 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.ekm.hairdo.R
 import com.ekm.hairdo.vars.*
+import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity
@@ -15,39 +17,40 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import java.util.*
 
 class AddressShowActivity : AppCompatActivity() {
-    val AUTOCOMPLETE_REQUEST_CODE = 2
     lateinit var continue_button: Button
     val TAG = "Addressactivity"
     var uid= "";
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_address_show)
-
+        Log.i(TAG, "OnCreate")
+        val apiKey = getString(R.string.api_key)
+        /**
+         * Initialize Places. For simplicity, the API key is hard-coded. In a production
+         * environment we recommend using a secure mechanism to manage API keys.
+         */
+        /**
+         * Initialize Places. For simplicity, the API key is hard-coded. In a production
+         * environment we recommend using a secure mechanism to manage API keys.
+         */
+        if (!Places.isInitialized()) {
+            Places.initialize(applicationContext, apiKey)
+        }
         val intent = intent
-        uid = intent.getStringExtra(otherUID).toString()
+        uid = intent?.getStringExtra(otherUID).toString()
         continue_button = findViewById(R.id.donebuttoninadressact)
         continue_button.setOnClickListener{onSearchCalled()}
     }
 
-    fun onSearchCalled() {
-        // Set the fields to specify which types of place data to return.
-        val fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG)
-        // Start the autocomplete intent.
-        val intent = Autocomplete.IntentBuilder(
-                AutocompleteActivityMode.OVERLAY, fields).setCountry("USA") //USA
-                .build(this)
-        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
-            when (resultCode) {
+    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            when (result.resultCode) {
 
                 Activity.RESULT_OK -> {
+                    Log.i(TAG, "result okay")
+                    val data: Intent? = result.data
                     data?.let {
                         val place = Autocomplete.getPlaceFromIntent(data)
                         ///
-
                         println(place.latLng)
                         //todo save address to database
                         val myIntent = Intent(this, UploadPhoto2::class.java)
@@ -56,16 +59,22 @@ class AddressShowActivity : AppCompatActivity() {
                         myIntent.putExtra(stylistAddress, place.address)
                         myIntent.putExtra(stylistLat, place.latLng?.latitude.toString())
                         myIntent.putExtra(stylistLng, place.latLng?.longitude.toString())
-                        startActivity(myIntent)
+
+                        //destroy places and free resource
+                        Places.deinitialize()
+                        //Send results back to calling activity
+                        setResult(Activity.RESULT_OK, myIntent)
+                        //destroy this activity
                         finish()
-                        ///
+
 
                         Log.i(TAG, "Place: ${place.name}, ${place.id}")
                     }
                     println(" -----------------------------------")
                 }
                 AutocompleteActivity.RESULT_ERROR -> {
-                    // TODO: Handle the error.
+                    Log.i(TAG, "result error")
+                    val data: Intent? = result.data
                     data?.let {
                         val status = Autocomplete.getStatusFromIntent(data)
                         println(status.statusMessage+" -----------------------------------")
@@ -74,12 +83,23 @@ class AddressShowActivity : AppCompatActivity() {
                 }
                 Activity.RESULT_CANCELED -> {
                     // The user canceled the operation.
-                    println(" canceled -----------------------------------")
+                    Log.i(TAG, "result is cancelled")
                 }
             }
-            return
-        }
-        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+
+
+
+    fun onSearchCalled() {
+        // Set the fields to specify which types of place data to return.
+        val fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG)
+        // Start the autocomplete intent.
+        val intent = Autocomplete.IntentBuilder(
+                AutocompleteActivityMode.OVERLAY, fields).setCountry("USA") //USA
+                .build(this)
+        resultLauncher.launch(intent)
+
     }
 
 }

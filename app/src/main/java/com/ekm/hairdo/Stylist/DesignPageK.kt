@@ -1,12 +1,17 @@
 package com.ekm.hairdo.Stylist
 
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -27,9 +32,19 @@ import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.yuyakaido.android.cardstackview.*
 import pl.aprilapps.easyphotopicker.EasyImage
+import pl.aprilapps.easyphotopicker.MediaSource
 
+import androidx.annotation.NonNull
+import com.ekm.hairdo.things.user
 
+import pl.aprilapps.easyphotopicker.MediaFile
 
+import pl.aprilapps.easyphotopicker.DefaultCallback
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.net.PlacesClient
+import kotlinx.android.synthetic.main.activity_cardst.*
 
 
 class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
@@ -58,9 +73,9 @@ class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
     private lateinit var mFirebaseAuth: FirebaseAuth
     private lateinit var mAuthStateListener: FirebaseAuth.AuthStateListener
 
-    private var isUidPresent = false;
+    private var isUidPresent = false
     private var uid = ""
-
+    lateinit private var mUser: user
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,7 +86,7 @@ class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
         initViews()
         initRecyclerViewAndAdapter()
 
-        uploadButton.setOnClickListener { goToUpload() }
+        uploadButton.setOnClickListener { goToUploadActivity() }
 
         chat.setOnClickListener { goToChat() }
 
@@ -86,6 +101,7 @@ class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
             if (user != null) {
                 Log.i(tag, "mAuthstatelistener is not null and uid is ${user.uid}")
                 designPageViewModel.createStacks(user.uid)
+                designPageViewModel.getAdress()
                 //user is signin
                 //onSignedInInitialized(user.displayName, user.uid)
                 //   Toast.makeText(CardActivityST.this, "good", Toast.LENGTH_LONG);
@@ -98,7 +114,16 @@ class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
             }
         }
 
+        //Starting the loading of data from viewmodel
         loadDataFromViewModelWhenReady()
+        loaduserDataFromViewModelWhenReady()
+
+    }
+
+    private fun loaduserDataFromViewModelWhenReady() {
+        designPageViewModel.mUser.observe(this, Observer {
+                mUser: user -> this.mUser = mUser
+    })
     }
 
     private fun loadDataFromViewModelWhenReady() {
@@ -106,7 +131,7 @@ class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
                 m: ArrayList<Stack> ->
 
             // Collections.shuffle(mStacks)
-            println("real size ${m.size}")
+            Log.i(tag,"There are ${m.size} cards downloaded")
             mStacks.addAll(m)
             mStackDesignAdapter.notifyDataSetChanged()
             mStackView.visibility = View.VISIBLE
@@ -124,22 +149,30 @@ class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
         startActivity(myIntent)
     }
 
-    private fun goToUpload() {
-        Log.i(tag, "upload" )
-        val easyImage: EasyImage = EasyImage.Builder(this) // Chooser only
-            // Will appear as a system chooser title, DEFAULT empty string
-            //.setChooserTitle("Pick media")
-            // Will tell chooser that it should show documents or gallery apps
-            //.setChooserType(ChooserType.CAMERA_AND_DOCUMENTS)  you can use this or the one below
-            //.setChooserType(ChooserType.CAMERA_AND_GALLERY)
-            // saving EasyImage state (as for now: last camera file link)
-             // Setting to true will cause taken pictures to show up in the device gallery, DEFAULT false
-            .setCopyImagesToPublicGalleryFolder(false) // Sets the name for images stored if setCopyImagesToPublicGalleryFolder = true
-            .setFolderName("EasyImage sample") // Allow multiple picking
-            .allowMultiple(true)
-            .build()
-        //TODO uploadActivity start
-        easyImage.openChooser(this)
+    //Create a address activity result listerner and register it
+    private val addressActivityResultLauncher = registerForActivityResult(
+        StartActivityForResult()
+    ) { result ->
+        Log.i(tag, "Result code is ${result.resultCode}")
+        if (result.resultCode == RESULT_OK) {
+            // There are no request codes
+            val data: Intent? = result.data
+            Log.i(tag, "the address is ${data?.getStringExtra(vars.stylistAddress)}")
+            // send address to database using viewModel
+            //TODO use viewmodel to send address data to user
+            //TODO go to uploadpicture activity
+        }
+    }
+    private fun goToUploadActivity() {
+            //First, check for address. If address is present, go to upload activity, otherwise, get address first.
+            if (mUser?.address==null) {
+                val myIntent = Intent(this, AddressShowActivity::class.java)
+                myIntent.putExtra(vars.otherUID, uid) //Optional parameter
+                Log.i(tag, "starting address activity for result")
+                addressActivityResultLauncher.launch(myIntent)
+            } else {
+                //TODO go to uploadpicture activity
+            }
     }
 
 
@@ -206,7 +239,7 @@ class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
         mFirebaseAuth.removeAuthStateListener(mAuthStateListener)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-    }
+
+
+
 }

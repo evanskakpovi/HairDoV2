@@ -104,7 +104,7 @@ public class DesignPage extends AppCompatActivity implements CustomStackDesignAd
         }
 
         // Create a new Places client instance.
-        PlacesClient placesClient = Places.createClient(this);
+        //PlacesClient placesClient = Places.createClient(this);
 
         mStacks = new ArrayList();
         mStackView= findViewById(R.id.mrecyclerlist );
