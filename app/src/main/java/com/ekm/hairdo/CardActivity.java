@@ -92,6 +92,8 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
                 }
             }
     );
+    private String tag = "CardActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -216,13 +218,13 @@ public class CardActivity extends AppCompatActivity implements CardStackListener
                             System.out.println("last visible: "+lastVisible);
 
                             for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.i(tag, "data "+document.getData());
                                 Stack mStack = mapper.convertValue(document.getData(), Stack.class);
                                 mStacks.add(mStack);
                             }
                             mStackAdapter.notifyDataSetChanged();
                             mStackView.setVisibility(View.VISIBLE);
                             getFavorites();
-
                         } else {
                             mStackAdapter.notifyDataSetChanged();
                             mStackView.setVisibility(View.VISIBLE);

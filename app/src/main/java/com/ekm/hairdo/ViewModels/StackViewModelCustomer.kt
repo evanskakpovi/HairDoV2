@@ -1,40 +1,27 @@
 package com.ekm.hairdo.ViewModels
 
-import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.recyclerview.widget.DiffUtil
-import com.ekm.hairdo.Stylist.CardActivityST
+import com.ekm.hairdo.ChatActivity
 import com.ekm.hairdo.things.Stack
 import com.ekm.hairdo.things.Stack.Companion.toStack
-import com.ekm.hairdo.things.StackDiffCallback
 import com.ekm.hairdo.things.user
 import com.ekm.hairdo.vars
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.firebase.ui.auth.AuthUI
-import com.firebase.ui.auth.AuthUI.IdpConfig
-import com.firebase.ui.auth.AuthUI.IdpConfig.EmailBuilder
-import com.firebase.ui.auth.AuthUI.IdpConfig.GoogleBuilder
-import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
-import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.launch
 import java.util.*
-import kotlin.collections.ArrayList
 
-class StackViewModel : ViewModel() {
+class StackViewModelCustomer : ViewModel() {
 
-    private val TAG = "StackViewModel"
+    private val TAG = "StackViewModelCustomer"
 
     lateinit var mapper: ObjectMapper
 
@@ -54,7 +41,9 @@ class StackViewModel : ViewModel() {
     }
 
     //Get new initial set of stacks. Note that last visible is initialized here
+
     fun getfirstStacks() {
+        Log.i(TAG, "getFirstStacks")
         viewModelScope.launch {
             val next = db.collection(vars.STYLES).limit(10)
 
@@ -66,13 +55,11 @@ class StackViewModel : ViewModel() {
                         for (document in documents) {
                             val stack = document.toStack()
                             freshStacks.add(stack!!)
-                            println(stack.url)
+                            Log.i(TAG, stack.url)
                         }
-
-                        //Retrieve current stacks first, and include in new stacks
                         _stacksViewModel.postValue(freshStacks)
-                        println("size ${_stacksViewModel.value?.size}")
-
+                        //Retrieve current stacks first, and include in new stacks
+                        Log.i(TAG, "size ${_stacksViewModel.value?.size}")
 
                     }
 
@@ -143,5 +130,9 @@ class StackViewModel : ViewModel() {
             }
     }
 
+    //Go to chatactivity
+    fun goToChatActivity(currentStack: Stack) {
+
+    }
 
 }

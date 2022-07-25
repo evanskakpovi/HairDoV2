@@ -5,6 +5,8 @@ import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.android.parcel.Parcelize
 
+
+
 @Parcelize
 data class Stack ( var address: String,
                    var url: String,

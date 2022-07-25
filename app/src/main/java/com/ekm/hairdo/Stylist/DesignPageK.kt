@@ -1,50 +1,24 @@
 package com.ekm.hairdo.Stylist
 
-import android.app.Activity
 import android.content.Intent
-import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.ekm.hairdo.ChatGroupActivity
-import com.ekm.hairdo.R
+import com.ekm.hairdo.*
 import com.ekm.hairdo.ViewModels.DesignPageViewModel
 import com.ekm.hairdo.adapters.StackDesignAdapterST
 import com.ekm.hairdo.listener.CustomStackDesignAdapterListener
 import com.ekm.hairdo.things.Stack
-import com.ekm.hairdo.vars
-import com.firebase.ui.auth.AuthUI
-import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
-import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
-import com.google.firebase.auth.FirebaseAuth
-import com.yuyakaido.android.cardstackview.*
-import pl.aprilapps.easyphotopicker.EasyImage
-import pl.aprilapps.easyphotopicker.MediaSource
-
-import androidx.annotation.NonNull
 import com.ekm.hairdo.things.user
-
-import pl.aprilapps.easyphotopicker.MediaFile
-
-import pl.aprilapps.easyphotopicker.DefaultCallback
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.net.PlacesClient
-import kotlinx.android.synthetic.main.activity_cardst.*
+import com.google.firebase.auth.FirebaseAuth
 
 
 class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
@@ -67,24 +41,24 @@ class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
     //Temporary fields
     lateinit var testUser:Button
 
-    var displayname: String = ""
-    lateinit var address: String
+
 
     private lateinit var mFirebaseAuth: FirebaseAuth
     private lateinit var mAuthStateListener: FirebaseAuth.AuthStateListener
 
     private var isUidPresent = false
-    private var uid = ""
     lateinit private var mUser: user
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard)
-
+        Log.i(tag, "On create")
         //InitViews
         initViews()
         initRecyclerViewAndAdapter()
+
 
         uploadButton.setOnClickListener { goToUploadActivity() }
 
@@ -99,9 +73,9 @@ class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
         mAuthStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             val user = firebaseAuth.currentUser
             if (user != null) {
-                Log.i(tag, "mAuthstatelistener is not null and uid is ${user.uid}")
-                designPageViewModel.createStacks(user.uid)
-                designPageViewModel.getAdress()
+                Log.i(tag, "user is $user and uid is ${user.uid}")
+                uploadButton.setText("Upload my work -${user.displayName.toString()}")
+                designPageViewModel.createStacksFromDatabase(user.uid, user.displayName.toString())
                 //user is signin
                 //onSignedInInitialized(user.displayName, user.uid)
                 //   Toast.makeText(CardActivityST.this, "good", Toast.LENGTH_LONG);
@@ -116,36 +90,58 @@ class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
 
         //Starting the loading of data from viewmodel
         loadDataFromViewModelWhenReady()
-        loaduserDataFromViewModelWhenReady()
+
 
     }
 
     private fun loaduserDataFromViewModelWhenReady() {
+        Log.i(tag, "LoadUserDataFromViewModel")
         designPageViewModel.mUser.observe(this, Observer {
                 mUser: user -> this.mUser = mUser
+
+            //First, check for address. If address is present, go to upload activity, otherwise, get address first.
+            if (mUser?.address==null) {
+                val myIntent = Intent(this, AddressShowActivity::class.java)
+                myIntent.putExtra(vars.otherUID, designPageViewModel.uid) //Optional parameter
+                Log.i(tag, "starting address activity for result")
+                addressActivityResultLauncher.launch(myIntent)
+            } else {
+                Log.i(tag, "Opening UploadPhotoK")
+                val myIntent = Intent(this, UploadPhotoK::class.java)
+                myIntent.putExtra(vars.otherUID, designPageViewModel.uid) //Optional parameters
+                myIntent.putExtra(vars.stylistAddress, mUser.address) //Optional parameters
+                myIntent.putExtra(vars.stylistLat, mUser.latitude) //Optional parameters
+                myIntent.putExtra(vars.stylistLng, mUser.longitude) //Optional parameters
+                startActivity(myIntent)
+            }
     })
     }
 
     private fun loadDataFromViewModelWhenReady() {
         designPageViewModel.stacksViewModel.observe(this, Observer {
                 m: ArrayList<Stack> ->
-
             // Collections.shuffle(mStacks)
             Log.i(tag,"There are ${m.size} cards downloaded")
             mStacks.addAll(m)
             mStackDesignAdapter.notifyDataSetChanged()
             mStackView.visibility = View.VISIBLE
+            //Get user data in order to retrieve address
+            designPageViewModel.getAdress()
         })
     }
 
-    //Will not ship with final version
+    //Debug feature -- This will not ship with production version
+    //this button allows easy navigation to customer facing version of cardview for testing
     private fun goToCardActivity() {
-        TODO("Not yet implemented")
+       //Create an intent for CardActivity and start intent
+        val myIntent = Intent(this, CardActivityCustomer::class.java)
+        myIntent.putExtra(vars.otherUID, designPageViewModel.uid) //Optional parameters
+        startActivity(myIntent)
     }
 
     private fun goToChat() {
         val myIntent = Intent(this, ChatGroupActivity::class.java)
-        myIntent.putExtra(vars.otherUID, uid) //Optional parameters
+        myIntent.putExtra(vars.otherUID, designPageViewModel.uid) //Optional parameters
         startActivity(myIntent)
     }
 
@@ -159,20 +155,17 @@ class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
             val data: Intent? = result.data
             Log.i(tag, "the address is ${data?.getStringExtra(vars.stylistAddress)}")
             // send address to database using viewModel
-            //TODO use viewmodel to send address data to user
-            //TODO go to uploadpicture activity
+            //TODO use viewmodel save address data to user data
+            designPageViewModel.submitAddress(
+                data?.getStringExtra(vars.stylistAddress).toString(),
+                data?.getStringExtra(vars.stylistLat).toString(),
+                data?.getStringExtra(vars.stylistLng).toString()
+            )
         }
     }
     private fun goToUploadActivity() {
-            //First, check for address. If address is present, go to upload activity, otherwise, get address first.
-            if (mUser?.address==null) {
-                val myIntent = Intent(this, AddressShowActivity::class.java)
-                myIntent.putExtra(vars.otherUID, uid) //Optional parameter
-                Log.i(tag, "starting address activity for result")
-                addressActivityResultLauncher.launch(myIntent)
-            } else {
-                //TODO go to uploadpicture activity
-            }
+        Log.i(tag, "Upload clicked")
+        loaduserDataFromViewModelWhenReady()
     }
 
 
@@ -224,10 +217,10 @@ class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
     }
 
     private fun onSignedOutCleanup() {
-        uid = ""
+//        uid = ""
         isUidPresent = false
         invalidateOptionsMenu()
-        Log.i(tag, "uid is $uid and isuidpresent is $isUidPresent and allowing menu to allow for login" )
+        Log.i(tag, "uid is ${designPageViewModel.uid} and isuidpresent is $isUidPresent and allowing menu to allow for login" )
     }
 
     override fun onResume() {
@@ -239,7 +232,9 @@ class DesignPageK : AppCompatActivity(), CustomStackDesignAdapterListener {
         mFirebaseAuth.removeAuthStateListener(mAuthStateListener)
     }
 
-
+    fun fib(n: Int): Int {
+        return if (n <= 1) n else fib(n - 1) + fib(n - 2)
+    }
 
 
 }

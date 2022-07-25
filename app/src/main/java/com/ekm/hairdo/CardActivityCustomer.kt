@@ -1,36 +1,32 @@
-package com.ekm.hairdo.Stylist
+package com.ekm.hairdo
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.animation.DecelerateInterpolator
-import android.widget.Button
 import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DiffUtil
-import com.ekm.hairdo.R
-import com.ekm.hairdo.ViewModels.StackViewModel
-import com.ekm.hairdo.adapters.StackAdapterST
+import com.ekm.hairdo.ViewModels.StackViewModelCustomer
+import com.ekm.hairdo.adapters.StackAdapter
 import com.ekm.hairdo.listener.CustomStackAdapterListener
 import com.ekm.hairdo.things.Stack
 import com.ekm.hairdo.things.StackDiffCallback
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.AuthStateListener
 import com.yuyakaido.android.cardstackview.*
-import kotlin.collections.ArrayList
 
 
-class CardActivityStylist : AppCompatActivity(), CardStackListener, CustomStackAdapterListener {
+class CardActivityCustomer : AppCompatActivity(), CardStackListener, CustomStackAdapterListener {
 
-    private var TAG = "CardActivityStylist"
+    private var TAG = "CardActivityCustomer"
     private var isUidPresent = false;
     private var uid = ""
     private var displayname = ""
@@ -47,13 +43,13 @@ class CardActivityStylist : AppCompatActivity(), CardStackListener, CustomStackA
     //Initialize CardStackView
     lateinit var mStackView: CardStackView
     //Init adapter for cardstacks
-    var mStackAdapter: StackAdapterST? = null
+    var mStackAdapter: StackAdapter? = null
     //Init layout manager
     var manager: CardStackLayoutManager? = null
     //Init list of cards
     lateinit var mStacks: ArrayList<Stack>
 
-    lateinit var showTalent: Button
+    lateinit var name: TextView
 
     var mDirection = Direction.Bottom
 
@@ -62,12 +58,12 @@ class CardActivityStylist : AppCompatActivity(), CardStackListener, CustomStackA
     private lateinit var mFirebaseAuth: FirebaseAuth
     private lateinit var mAuthStateListener: AuthStateListener
 
-    private val stackViewModel: StackViewModel by viewModels()
+    private val stackViewModelCustomer: StackViewModelCustomer by viewModels()
 
     // Show cardstacks on create but first, we need to downloads a random set of stacks
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_cardst)
+        setContentView(R.layout.activity_card)
         //Init views
         initOtherViews()
 
@@ -86,7 +82,7 @@ class CardActivityStylist : AppCompatActivity(), CardStackListener, CustomStackA
                 //user is signed out
                 onSignedOutCleanup()
                 //Init recyclerView and Adapter
-                initRecyclerViewAndAdapter()
+
             }
         }
 
@@ -95,18 +91,22 @@ class CardActivityStylist : AppCompatActivity(), CardStackListener, CustomStackA
 
     //Init otherViews
     private fun initOtherViews() {
-        showTalent = findViewById(R.id.message)
+        //Temporary and to be deleted
+        Log.i(TAG, "initialize other views")
+        //Temporary and to be deleted
+        name = findViewById(R.id.namme)
     }
 
     //Init recyclerview and stackadapter
     private fun initRecyclerViewAndAdapter() {
-        mStackView = findViewById(R.id.activity_main_card_stackst)
+        Log.i(TAG, "initials recycler")
+        mStackView = findViewById(R.id.activity_main_card_stack)
         mStacks = ArrayList()
-        mStackAdapter = StackAdapterST(this, mStacks, this)
+        mStackAdapter = StackAdapter(this, mStacks, this)
         manager = CardStackLayoutManager(this, this)
         initializeCardsSettings()
-        stackViewModel.getfirstStacks()
-        stackViewModel.stacksViewModel.observe(this, Observer {
+        stackViewModelCustomer.getfirstStacks()
+        stackViewModelCustomer.stacksViewModel.observe(this, Observer {
             m: ArrayList<Stack> -> paginate(m)
             // Collections.shuffle(mStacks)
             println("real size ${m.size}")
@@ -132,9 +132,6 @@ class CardActivityStylist : AppCompatActivity(), CardStackListener, CustomStackA
         mStackView?.layoutManager = manager
         mStackView?.adapter = mStackAdapter
         mStackView?.itemAnimator = DefaultItemAnimator()
-        showTalent.setOnClickListener{
-        signin()
-        }
 
     }
     //  private void paginate(ArrayList<Stack> freshStacks) {
@@ -172,7 +169,7 @@ class CardActivityStylist : AppCompatActivity(), CardStackListener, CustomStackA
         if (manager!!.topPosition == mStackAdapter!!.itemCount - 5) {
             println("lets paginate")
             //load new cards
-            stackViewModel.getNewStacks()
+            stackViewModelCustomer.getNewStacks()
         }
     }
 
@@ -202,8 +199,16 @@ class CardActivityStylist : AppCompatActivity(), CardStackListener, CustomStackA
         mStackView.rewind()
     }
 
+    //Launch chat activity if logged in
     override fun onChatButtonClicked(currentStack: Stack?) {
-
+        //TODO check logged in state from ViewModel
+        if (isUidPresent) {
+        val myIntent = Intent(this, ChatActivity::class.java)
+        myIntent.putExtra(vars.otherUID, currentStack!!.stylistId) //Optional parameters
+        startActivity(myIntent)}
+        else {
+          //TO DO sign in and go to chat
+        }
     }
 
     override fun addFavorite(isChecked: Boolean, hairid: String?) {
@@ -228,21 +233,21 @@ class CardActivityStylist : AppCompatActivity(), CardStackListener, CustomStackA
     }
 
     private fun signin() {
-            // Choose authentication providers
-            val providers = arrayListOf(
-                AuthUI.IdpConfig.EmailBuilder().build(),
-                // AuthUI.IdpConfig.PhoneBuilder().build(),
-                AuthUI.IdpConfig.GoogleBuilder().build(),
-                //AuthUI.IdpConfig.FacebookBuilder().build(),
-                //AuthUI.IdpConfig.TwitterBuilder().build()
-            )
+        // Choose authentication providers
+        val providers = arrayListOf(
+            AuthUI.IdpConfig.EmailBuilder().build(),
+           // AuthUI.IdpConfig.PhoneBuilder().build(),
+            AuthUI.IdpConfig.GoogleBuilder().build(),
+            //AuthUI.IdpConfig.FacebookBuilder().build(),
+            //AuthUI.IdpConfig.TwitterBuilder().build()
+        )
 
-            // Create and launch sign-in intent
-            val signInIntent = AuthUI.getInstance()
-                .createSignInIntentBuilder()
-                .setAvailableProviders(providers)
-                .build()
-            signInLauncher.launch(signInIntent)
+        // Create and launch sign-in intent
+        val signInIntent = AuthUI.getInstance()
+            .createSignInIntentBuilder()
+            .setAvailableProviders(providers)
+            .build()
+        signInLauncher.launch(signInIntent)
     }
 
     private fun signout() {
@@ -250,7 +255,6 @@ class CardActivityStylist : AppCompatActivity(), CardStackListener, CustomStackA
             .signOut(this)
             .addOnCompleteListener {
                 // ...
-                //
             }
     }
 
@@ -258,19 +262,13 @@ class CardActivityStylist : AppCompatActivity(), CardStackListener, CustomStackA
         this.uid = uid
         isUidPresent = true
         invalidateOptionsMenu()
-        var name: TextView = findViewById(R.id.namme)
         name.setText(displayName)
         displayname = displayName.toString()
-        stackViewModel.addToUserList(displayName.toString(), uid)
-        goToDashboard()
+        initRecyclerViewAndAdapter()
+        stackViewModelCustomer.addToUserList(displayName.toString(), uid)
+
     }
 
-    private fun goToDashboard() {
-        val myIntent = Intent(this, DesignPageK::class.java)
-        // myIntent.putExtra(var.stylistID, currentStack.getStylistId()); //Optional parameters
-        startActivity(myIntent)
-        finish()
-    }
 
     private fun onSignedOutCleanup() {
         uid = ""

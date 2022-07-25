@@ -17,4 +17,5 @@
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="api_key">AIzaSyBGvW6FC-p12eTdbT0mqibImEhB_19cAHA</string>
     <string name="addresstext">Providing your address will help nearby clients find your work faster. Your address will not be shared with anyone.</string>
+    <string name="placeholdertext">Our hairdo is a big part of our personality. \n\nBe it a simple cornrow, or box braids, we recognize the talent and range of experience present in our community, and we made this platform to help you show the world what you can do. \n \nWe invite you to expose your work, and ultimately provide services to member of our community for a fee.</string>
 </resources>
